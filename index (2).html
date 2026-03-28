@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ocean Guardian Upload Page</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      color: #10324a;
+      background:
+        radial-gradient(circle at top, #dff7ff 0%, #f2fdff 28%, #dff5ff 56%, #e7fff3 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px;
+      position: relative;
+      z-index: 2;
+    }
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob.a { width: 320px; height: 320px; background: rgba(34, 211, 238, 0.22); top: -80px; left: -60px; }
+    .blob.b { width: 360px; height: 360px; background: rgba(59, 130, 246, 0.16); top: 120px; right: -90px; }
+    .blob.c { width: 340px; height: 340px; background: rgba(52, 211, 153, 0.16); bottom: -100px; left: 28%; }
+
+    .bubble {
+      position: fixed;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.28) inset;
+      animation: floatUp 10s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    @keyframes floaty {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .sticker {
+      position: fixed;
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(16,50,74,0.08);
+      font-size: 14px;
+      font-weight: 700;
+      animation: floaty 3.2s ease-in-out infinite;
+      z-index: 1;
+      color: #0f4c72;
+    }
+    .s1 { top: 16px; left: 18px; }
+    .s2 { top: 72px; right: 24px; }
+    .s3 { bottom: 96px; left: 22px; }
+    .s4 { bottom: 28px; right: 34px; }
+
+    .card {
+      background: rgba(255,255,255,0.84);
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.78);
+      box-shadow: 0 20px 55px rgba(16,50,74,0.10);
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-body { padding: 28px; }
+    .grid-top {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      border: 1px solid #bae6fd;
+      background: #ecfeff;
+      color: #0f5b7a;
+    }
+    .pill.green {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+      color: #0f766e;
+    }
+    .pill.deep {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr 240px;
+      gap: 18px;
+      align-items: center;
+    }
+    .hero-title {
+      font-size: 54px;
+      line-height: 1.02;
+      font-weight: 900;
+      color: #0d2f47;
+      margin: 8px 0 14px;
+    }
+    .hero-text {
+      font-size: 17px;
+      line-height: 1.8;
+      color: #446176;
+      max-width: 740px;
+    }
+    .hero-art {
+      min-height: 240px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, #bff5ff 0%, #86d9ff 38%, #56c4e7 100%);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 -20px 40px rgba(3, 105, 161, 0.12);
+    }
+    .wave {
+      position: absolute;
+      left: -10%;
+      width: 120%;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.28);
+    }
+    .wave.one { height: 120px; bottom: -40px; }
+    .wave.two { height: 90px; bottom: 24px; background: rgba(255,255,255,0.16); }
+    .sea-emoji {
+      position: absolute;
+      font-size: 54px;
+      filter: drop-shadow(0 8px 18px rgba(8, 47, 73, 0.15));
+    }
+    .turtle-main { top: 26px; right: 26px; font-size: 80px; }
+    .fish-a { bottom: 44px; left: 20px; }
+    .fish-b { bottom: 90px; right: 102px; font-size: 42px; }
+    .coral { bottom: 12px; left: 110px; font-size: 38px; }
+    .shell { bottom: 18px; right: 20px; font-size: 34px; }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    button, .file-button {
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
+    }
+    button:hover, .file-button:hover { transform: translateY(-2px); }
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 22px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg,#0ea5e9,#14b8a6);
+      color: white;
+      box-shadow: 0 12px 28px rgba(14,165,233,0.24);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    .btn-secondary {
+      background: #ecfeff;
+      color: #0f5b7a;
+      border: 1px solid #bae6fd;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #0d2f47;
+      margin-bottom: 12px;
+    }
+    .small-muted {
+      font-size: 13px;
+      color: #6a8797;
+      line-height: 1.6;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .mini-box {
+      border-radius: 24px;
+      padding: 18px;
+      background: linear-gradient(135deg,#f0fdff,#eff6ff);
+      border: 1px solid #dbeafe;
+    }
+    .mini-number {
+      font-size: 34px;
+      font-weight: 900;
+      color: #0d2f47;
+      margin-top: 6px;
+    }
+
+    .cta-banner {
+      margin-top: 24px;
+      border-radius: 28px;
+      padding: 20px;
+      background: linear-gradient(90deg,#0ea5e9,#14b8a6);
+      color: white;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 18px 36px rgba(14,165,233,0.18);
+    }
+    .cta-title {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .cta-text {
+      max-width: 760px;
+      line-height: 1.7;
+      font-size: 15px;
+      opacity: 0.97;
+    }
+    .cta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.22);
+      font-weight: 800;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .main-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .upload-box {
+      background: linear-gradient(180deg,#ffffff 0%, #f4fdff 100%);
+      border: 2px dashed #7dd3fc;
+      border-radius: 28px;
+      padding: 22px;
+      text-align: center;
+      margin-top: 18px;
+    }
+    .upload-icon {
+      width: 86px;
+      height: 86px;
+      border-radius: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 48px;
+      background: linear-gradient(135deg,#dff7ff,#ecfdf5);
+      box-shadow: 0 12px 30px rgba(14,165,233,0.12);
+    }
+    .upload-title {
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.2;
+      color: #0d2f47;
+      margin-bottom: 10px;
+    }
+    .upload-subtitle {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #4a687d;
+      max-width: 640px;
+      margin: 0 auto 18px;
+    }
+    .highlight-line {
+      margin: 12px auto 20px;
+      max-width: 720px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #ecfeff;
+      border: 1px solid #bae6fd;
+      color: #0f5b7a;
+      font-weight: 800;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .form-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      color: #164764;
+      margin-bottom: 8px;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid #cfeeff;
+      background: white;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #17384f;
+      outline: none;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    .file-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 18px;
+      padding: 16px 22px;
+      background: linear-gradient(90deg,#0ea5e9,#14b8a6);
+      color: white;
+      font-weight: 900;
+      font-size: 16px;
+      border: none;
+      box-shadow: 0 14px 30px rgba(14,165,233,0.20);
+      width: 100%;
+    }
+    .file-hidden { display: none; }
+    .consent-box {
+      border-radius: 18px;
+      background: #f0fdff;
+      border: 1px solid #bae6fd;
+      padding: 14px 16px;
+      line-height: 1.7;
+      font-size: 14px;
+      color: #3c5b6e;
+    }
+    .checkbox-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #426275;
+    }
+    .submit-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 20px;
+      padding: 16px 22px;
+      background: linear-gradient(90deg,#0ea5e9,#14b8a6);
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      box-shadow: 0 14px 32px rgba(14,165,233,0.22);
+    }
+    .success-message {
+      display: none;
+      margin-top: 16px;
+      border-radius: 18px;
+      background: #ecfdf5;
+      border: 1px solid #bbf7d0;
+      padding: 16px;
+      color: #0f766e;
+      font-weight: 800;
+      line-height: 1.6;
+      animation: popIn 0.2s ease;
+    }
+
+    .preview-card {
+      border-radius: 28px;
+      background: linear-gradient(180deg,#ffffff 0%, #f8feff 100%);
+      border: 1px solid #d9f3ff;
+      overflow: hidden;
+    }
+    .preview-top {
+      padding: 18px 18px 10px;
+    }
+    .preview-photo {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background: linear-gradient(180deg,#dff7ff 0%, #c9f5ff 32%, #88d7f1 100%);
+      display: block;
+    }
+    .preview-empty {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg,#dff7ff 0%, #c9f5ff 32%, #88d7f1 100%);
+      color: #0d4b69;
+      font-weight: 800;
+      text-align: center;
+      padding: 18px;
+    }
+    .preview-caption {
+      padding: 16px 18px 20px;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #ecfeff;
+      color: #0f5b7a;
+      border: 1px solid #bae6fd;
+    }
+
+    .tips-grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .tip-card {
+      border-radius: 24px;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid #dbeafe;
+      padding: 18px;
+    }
+    .tip-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #0d2f47;
+      margin-bottom: 8px;
+    }
+    .gallery-grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .gallery-card {
+      border-radius: 24px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #d9f3ff;
+      box-shadow: 0 12px 30px rgba(16,50,74,0.06);
+    }
+    .gallery-art {
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(180deg,#dff7ff 0%, #a5ecff 28%, #6ad0e8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 58px;
+      position: relative;
+      overflow: hidden;
+    }
+    .gallery-caption {
+      padding: 14px 16px 18px;
+    }
+    .gallery-name {
+      font-size: 15px;
+      font-weight: 900;
+      color: #0d2f47;
+      margin-bottom: 6px;
+    }
+    .footer-note {
+      margin: 26px 0 8px;
+      text-align: center;
+      color: #5d7b8f;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 980px) {
+      .grid-top, .main-grid, .hero-layout, .play-grid, .finish-grid { grid-template-columns: 1fr; }
+      .hero-layout { gap: 14px; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .tips-grid, .stats-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 38px; }
+      .cta-title { font-size: 22px; }
+      .upload-title { font-size: 25px; }
+      .sticker { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+
+  <div class="bubble" style="left: 8%; bottom: -20px; animation-delay: 0s;"></div>
+  <div class="bubble" style="left: 20%; bottom: -30px; animation-delay: 2s;"></div>
+  <div class="bubble" style="left: 34%; bottom: -28px; animation-delay: 4s;"></div>
+  <div class="bubble" style="left: 48%; bottom: -25px; animation-delay: 1s;"></div>
+  <div class="bubble" style="left: 63%; bottom: -22px; animation-delay: 3s;"></div>
+  <div class="bubble" style="left: 77%; bottom: -30px; animation-delay: 5s;"></div>
+  <div class="bubble" style="left: 89%; bottom: -24px; animation-delay: 1.5s;"></div>
+
+  <div class="sticker s1">🐢 Save sea turtles</div>
+  <div class="sticker s2">🌊 Upload rescue stories</div>
+  <div class="sticker s3">🐠 Protect marine life</div>
+  <div class="sticker s4">📸 Share your ocean action</div>
+
+  <div class="page">
+    <div class="grid-top">
+      <div class="card">
+        <div class="card-body">
+          <div class="pill-row">
+            <span class="pill">Ocean Protection Page</span>
+            <span class="pill green">Mobile QR Entry</span>
+            <span class="pill deep">Photo Upload Campaign</span>
+          </div>
+
+          <div class="hero-layout">
+            <div>
+              <div class="hero-title">Upload Your Marine Animal Rescue Photo</div>
+              <div class="hero-text">
+                Scan the QR code, enter this page, and share your moment of helping marine life. This page is designed to highlight sea turtles, fish, coral, and ocean conservation, while making the upload action the most visible part of the experience.
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary" onclick="scrollToUpload()">📸 Upload Your Rescue Photo Now</button>
+                <button class="btn btn-secondary" onclick="scrollToGallery()">🌊 View Ocean Hero Wall</button>
+              </div>
+            </div>
+
+            <div class="hero-art">
+              <div class="sea-emoji turtle-main">🐢</div>
+              <div class="sea-emoji fish-a">🐠</div>
+              <div class="sea-emoji fish-b">🐟</div>
+              <div class="sea-emoji coral">🪸</div>
+              <div class="sea-emoji shell">🐚</div>
+              <div class="wave one"></div>
+              <div class="wave two"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="section-title">Campaign Snapshot</div>
+          <div class="stats-grid">
+            <div class="mini-box">
+              <div class="small-muted">Main Species Focus</div>
+              <div class="mini-number">🐢</div>
+              <div class="small-muted">Sea turtles are the hero visual of this page.</div>
+            </div>
+            <div class="mini-box">
+              <div class="small-muted">Upload Flow</div>
+              <div class="mini-number">1 Tap</div>
+              <div class="small-muted">The upload section is designed to be obvious right away.</div>
+            </div>
+            <div class="mini-box">
+              <div class="small-muted">Photo Theme</div>
+              <div class="mini-number">Rescue</div>
+              <div class="small-muted">Upload your rescue, cleanup, or care moment.</div>
+            </div>
+            <div class="mini-box">
+              <div class="small-muted">Audience Device</div>
+              <div class="mini-number">📱</div>
+              <div class="small-muted">Best for people entering by phone after scanning a QR code.</div>
+            </div>
+          </div>
+          <div style="height:18px"></div>
+          <div class="section-title" style="font-size:18px;">Suggested Upload Prompt</div>
+          <div class="small-muted" style="font-size:14px; line-height:1.8;">
+            Upload your photo of helping, rescuing, cleaning, or supporting marine animals. Sea turtle rescue photos, ocean cleanup moments, and photos with marine protection campaigns are especially encouraged.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-banner">
+      <div>
+        <div class="cta-title">📸 Upload your rescued marine animal photo here</div>
+        <div class="cta-text">Make the action clear for every audience member who scans the QR code: upload your sea turtle rescue photo, ocean cleanup photo, or marine life protection moment and become part of the Ocean Guardian Wall.</div>
+      </div>
+      <div class="cta-chip">🐢 Sea turtle stories welcome</div>
+    </div>
+
+    <div class="main-grid">
+      <div class="card" id="uploadSection">
+        <div class="card-body">
+          <div class="section-title">Ocean Guardian Upload Center</div>
+          <div class="small-muted">This section is designed to be the strongest visual focus after scanning the QR code.</div>
+
+          <div class="upload-box">
+            <div class="upload-icon">📸</div>
+            <div class="upload-title">Upload Your Sea Turtle or Marine Rescue Photo</div>
+            <div class="upload-subtitle">
+              Share your moment of protecting ocean life. You may upload a photo of helping sea turtles, supporting marine rescue work, joining an ocean cleanup, or taking part in a marine conservation activity.
+            </div>
+            <div class="highlight-line">
+              ✅ Clear prompt for visitors: Upload your rescued marine animal photo now. Sea turtle rescue photos, marine protection photos, and ocean cleanup moments are strongly encouraged.
+            </div>
+
+            <div class="form-grid">
+              <div>
+                <label for="photoInput">Choose your rescue photo</label>
+                <label class="file-button" for="photoInput">📁 Select Photo from Your Phone</label>
+                <input id="photoInput" class="file-hidden" type="file" accept="image/*" />
+              </div>
+
+              <div>
+                <label for="nameInput">Your name or nickname</label>
+                <input id="nameInput" type="text" placeholder="Example: Zoey / Ocean Volunteer / Turtle Helper" />
+              </div>
+
+              <div>
+                <label for="typeInput">What kind of marine protection moment is this?</label>
+                <select id="typeInput">
+                  <option value="Sea turtle rescue">Sea turtle rescue</option>
+                  <option value="Ocean cleanup">Ocean cleanup</option>
+                  <option value="Marine animal care">Marine animal care</option>
+                  <option value="Campaign support photo">Campaign support photo</option>
+                  <option value="Other marine protection action">Other marine protection action</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="storyInput">Write a short story or caption</label>
+                <textarea id="storyInput" placeholder="Tell us what happened. Example: I joined a beach cleanup and helped remove plastic waste from a turtle nesting area."></textarea>
+              </div>
+
+              <div class="consent-box">
+                This demo page simulates a real upload experience. The wording is designed for a campaign where visitors scan a QR code and are clearly guided to upload their marine rescue or protection photo.
+              </div>
+
+              <label class="checkbox-row">
+                <input id="consentInput" type="checkbox" />
+                <span>I confirm this photo is related to marine conservation, rescue, protection, cleanup, or an awareness activity, and I agree it may be shown on the public Ocean Hero Wall.</span>
+              </label>
+
+              <button class="submit-btn" onclick="submitDemoUpload()">🐢 Submit My Marine Rescue Photo</button>
+              <div id="successMessage" class="success-message">
+                Upload submitted successfully for demo display. Your Ocean Guardian photo has been added to the preview wall below.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; gap:22px;">
+        <div class="card preview-card">
+          <div class="preview-top">
+            <div class="section-title" style="margin-bottom:6px;">Live Upload Preview</div>
+            <div class="small-muted">This side helps visitors immediately see how their photo and story will appear.</div>
+          </div>
+          <img id="previewImage" class="preview-photo" src="" alt="Preview" style="display:none;" />
+          <div id="previewEmpty" class="preview-empty">
+            <div style="font-size:70px;">🐢</div>
+            <div style="font-size:19px; font-weight:900;">Your marine rescue photo preview will appear here</div>
+            <div style="font-size:14px; line-height:1.7; max-width:280px;">Upload a sea turtle rescue image, ocean cleanup photo, or marine protection moment to preview it instantly.</div>
+          </div>
+          <div class="preview-caption">
+            <div id="previewName" style="font-size:18px; font-weight:900; color:#0d2f47;">Ocean Guardian Visitor</div>
+            <div id="previewStory" class="small-muted" style="margin-top:8px; font-size:14px; line-height:1.8;">
+              Your marine rescue caption will appear here after you choose a photo and write your story.
+            </div>
+            <div class="tag-row">
+              <span id="previewType" class="tag">Sea turtle rescue</span>
+              <span class="tag">QR upload page</span>
+              <span class="tag">Marine life protection</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="section-title">Upload Tips for Visitors</div>
+            <div class="tips-grid">
+              <div class="tip-card">
+                <div class="tip-title">🐢 Best photo theme</div>
+                <div class="small-muted">Sea turtle rescue and support moments should be the most strongly encouraged subject on the page.</div>
+              </div>
+              <div class="tip-card">
+                <div class="tip-title">🌊 Keep the message clear</div>
+                <div class="small-muted">Use direct wording like Upload Your Marine Rescue Photo or Share Your Sea Turtle Story.</div>
+              </div>
+              <div class="tip-card">
+                <div class="tip-title">📱 Designed for QR traffic</div>
+                <div class="small-muted">The most important button and upload area appear high on the page for phone users.</div>
+              </div>
+              <div class="tip-card">
+                <div class="tip-title">🪸 Strong ocean visuals</div>
+                <div class="small-muted">The page uses sea creatures, wave shapes, blue-green colors, and marine imagery to reinforce the theme.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="gallerySection" style="margin-top:24px;">
+      <div class="card-body">
+        <div class="section-title">Ocean Hero Wall</div>
+        <div class="small-muted">This gallery simulates the kind of wall your audience could see after uploading their photo. The first card updates live after the demo upload.</div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          <div class="gallery-card" id="liveGalleryCard">
+            <div class="gallery-art" id="liveGalleryArt">🐢</div>
+            <div class="gallery-caption">
+              <div class="gallery-name" id="liveGalleryName">Your name will appear here</div>
+              <div class="small-muted" id="liveGalleryText">Your upload preview will appear here after submission.</div>
+            </div>
+          </div>
+
+          <div class="gallery-card">
+            <div class="gallery-art">🐢</div>
+            <div class="gallery-caption">
+              <div class="gallery-name">Sea Turtle Support Team</div>
+              <div class="small-muted">Beach cleanup volunteers helping protect turtle nesting spaces.</div>
+            </div>
+          </div>
+
+          <div class="gallery-card">
+            <div class="gallery-art">🐠</div>
+            <div class="gallery-caption">
+              <div class="gallery-name">Ocean Cleanup Visitor</div>
+              <div class="small-muted">Removing plastic waste to keep marine habitats cleaner and safer.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      This is a simulated marine protection upload page prototype. It is designed to show how a QR code landing page can strongly guide visitors to upload rescue or conservation photos, with sea turtles and ocean life as the main visual focus.
+    </div>
+  </div>
+
+  <script>
+    function scrollToUpload() {
+      document.getElementById('uploadSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function scrollToGallery() {
+      document.getElementById('gallerySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    const photoInput = document.getElementById('photoInput');
+    const previewImage = document.getElementById('previewImage');
+    const previewEmpty = document.getElementById('previewEmpty');
+    const previewName = document.getElementById('previewName');
+    const previewStory = document.getElementById('previewStory');
+    const previewType = document.getElementById('previewType');
+
+    photoInput.addEventListener('change', function (event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+        previewImage.style.display = 'block';
+        previewEmpty.style.display = 'none';
+        document.getElementById('liveGalleryArt').innerHTML = `<img src="${e.target.result}" alt="Gallery upload" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('nameInput').addEventListener('input', function () {
+      previewName.textContent = this.value.trim() || 'Ocean Guardian Visitor';
+    });
+
+    document.getElementById('storyInput').addEventListener('input', function () {
+      previewStory.textContent = this.value.trim() || 'Your marine rescue caption will appear here after you choose a photo and write your story.';
+    });
+
+    document.getElementById('typeInput').addEventListener('change', function () {
+      previewType.textContent = this.value;
+    });
+
+    function submitDemoUpload() {
+      const name = document.getElementById('nameInput').value.trim();
+      const story = document.getElementById('storyInput').value.trim();
+      const type = document.getElementById('typeInput').value;
+      const consent = document.getElementById('consentInput').checked;
+      const file = photoInput.files && photoInput.files[0];
+
+      if (!file) {
+        alert('Please upload a marine rescue or ocean protection photo first.');
+        return;
+      }
+      if (!consent) {
+        alert('Please confirm the consent statement before submitting.');
+        return;
+      }
+
+      previewName.textContent = name || 'Ocean Guardian Visitor';
+      previewStory.textContent = story || 'A marine conservation supporter uploaded this rescue or protection moment.';
+      previewType.textContent = type;
+
+      document.getElementById('liveGalleryName').textContent = name || 'Ocean Guardian Visitor';
+      document.getElementById('liveGalleryText').textContent = story || 'A marine conservation supporter uploaded this rescue or protection moment.';
+      document.getElementById('successMessage').style.display = 'block';
+      document.getElementById('gallerySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
+</body>
+</html>
